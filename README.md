@@ -3,5 +3,8 @@
 
 ## To run:
 install docker, clone the repo and then do:
-`docker build . -t lsc_host`
+
+`docker build . -t lsc_host`\
 `docker run -p 8501:8501 -d lsc_host`
+
+or use the `run.sh` script
