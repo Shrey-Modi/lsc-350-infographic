@@ -126,6 +126,7 @@ def main():
 
     cases_start_year = st.slider('number of months to include', 1, 35, 12)
     st.line_chart(cases.tail(cases_start_year), x='month', y='cumulative_confirmed')
+    st.write("Source: https://health.google.com/covid-19/open-data/")
 
     st.markdown('---')
 
@@ -145,6 +146,9 @@ def main():
 
     st.header('Disruptions in the Supply Chain')
     st.write("The chip scarcity has revealed flaws in global supply systems, leading businesses to rethink and diversify their supply sources. Increased supply chain risk awareness may lead to more robust and diverse supply chain strategies in the future.")
+
+    st.markdown("---")
+    st.write("References: \n\nhttps://www.asml.com/en/technology/all-about-microchips/microchip-basics")
 
 if __name__ == '__main__':
     main()
