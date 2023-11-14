@@ -1,1 +1,4 @@
 .env/
+cases.csv
+MTC*
+.DS_Store
