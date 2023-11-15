@@ -4,6 +4,40 @@ import squarify
 import secrets
 import pandas as pd
 
+@st.cache_data
+def internet_plot(countries, internet_start_year):
+    internet_data = pd.read_csv('internet.csv')
+    for country in countries:
+        internet_data[country] = internet_data[internet_data['Entity'] == country]['Internet Users(%)']
+    internet_data['Year'] = internet_data['Year'].astype(str)
+    # internet_data = internet_data[internet_data['Entity'].isin(countries)]
+    # merge rows
+    internet_data = internet_data[['Year'] + countries]
+    # rename country columns
+    internet_data = internet_data.groupby(['Year']).sum().reset_index()
+    internet_data = internet_data[internet_data['Year'].astype(int) >= internet_start_year]
+    st.line_chart(internet_data, x='Year', y=countries)
+
+@st.cache_data
+def get_internet_unique_countries():
+    internet_data = pd.read_csv('internet.csv')
+    return internet_data['Entity'].unique()
+
+@st.cache_data
+def get_vehicle_plot(start_year):
+    data = pd.read_csv('DAUPSA.csv')
+
+    data['month'] = data['DATE'].apply(lambda x: x[:7])
+    data = data[data['DATE'].apply(lambda x: int(x[:4]) >= start_year)]
+
+    data['Domestic auto production'] = data['DAUPSA'].astype(float)
+    st.line_chart(data, x='month', y='Domestic auto production')
+
+@st.cache_data
+def get_cases_plot(cases_start_year):
+    cases = pd.read_csv('cases_clean.csv')
+
+    st.line_chart(cases.tail(cases_start_year), x='month', y='cumulative_confirmed')
 
 def main():
     st.title('LSC Infographic: Global Chip Shortage')
@@ -89,43 +123,28 @@ def main():
     st.title('Causes of Shortage of Chips on a global level')
     st.header('Increased Electronics Demand')
     st.write("As more people worked, studied, and enjoyed themselves at home due to the COVID-19 epidemic, demand for electronic equipment increased. This raised demand for laptops, tablets, and gaming consoles, putting pressure on the semiconductor supply chain.")
-    internet_data = pd.read_csv('internet.csv')
+    internet_start_year = st.slider('start year', 2000, 2020, 2000)
     countries = st.multiselect(
-            "Choose countries", internet_data['Entity'].unique(), ["United States"]
+            "Choose countries", get_internet_unique_countries(), ["United States"]
         )
     
-    for country in countries:
-        internet_data[country] = internet_data[internet_data['Entity'] == country]['Internet Users(%)']
-    internet_start_year = st.slider('start year', 2000, 2020, 2000)
-    internet_data['Year'] = internet_data['Year'].astype(str)
-    # internet_data = internet_data[internet_data['Entity'].isin(countries)]
-    # merge rows
-    internet_data = internet_data[['Year'] + countries]
-    # rename country columns
-    internet_data = internet_data.groupby(['Year']).sum().reset_index()
-    internet_data = internet_data[internet_data['Year'].astype(int) >= internet_start_year]
-    st.line_chart(internet_data, x='Year', y=countries)
+
     st.write('source: https://www.kaggle.com/datasets/ashishraut64/internet-users/')
 
     st.header('Impact on the Automotive Industry')
     st.write("The automobile industry, a major user of semiconductors, was impacted. Because of the pandemic's unpredictability, several automakers cut chip orders. When demand recovered, semiconductor makers were unable to keep up with the unexpected rise.")
-    data = pd.read_csv('DAUPSA.csv')
-
-    data['month'] = data['DATE'].apply(lambda x: x[:7])
+    
+    
     start_year = st.slider('start year', 2005, 2021, 2010)
-    data = data[data['DATE'].apply(lambda x: int(x[:4]) >= start_year)]
-
-    data['Domestic auto production'] = data['DAUPSA'].astype(float)
-    st.line_chart(data, x='month', y='Domestic auto production') 
+    get_vehicle_plot(start_year)
+     
     st.write("Domestic auto production is defined as all autos assembled in the U.S.\n\nSource: https://fred.stlouisfed.org/series/DAUPSA")
 
     st.header("Disruptions in the Supply Chain")
     st.write("The epidemic affected worldwide supply lines, hurting semiconductor manufacture and delivery. Manufacturing facility lockdowns, limitations, and closures hampered or temporarily halted output.")
     # shipping_data = pd.read_csv('shipping.csv')
-    cases = pd.read_csv('cases_clean.csv')
-
     cases_start_year = st.slider('number of months to include', 1, 35, 12)
-    st.line_chart(cases.tail(cases_start_year), x='month', y='cumulative_confirmed')
+    get_cases_plot(cases_start_year)
     st.write("Source: https://health.google.com/covid-19/open-data/")
 
     st.markdown('---')
